@@ -260,11 +260,25 @@ def update_graph_and_table(selected_application_id, selected_functionality, sele
         if selected_request_status is not None:
             filtered_df = filtered_df[filtered_df['REQUEST_STATUS'] == selected_request_status]
     
-        # Create the figure (assuming you're using Plotly for visualization)
-        fig = create_plotly_figure(filtered_df)  # Your figure generation function
-        
-        # Create the table (assuming you're using Dash DataTable or similar)
-        table = create_dash_table(filtered_df)  # Your table generation function
+         # Create colorful graph
+        requests_per_day = filtered_df.groupby(filtered_df['CREATION_DATE'].dt.date).size().reset_index(name='Request Count')
+        fig = px.bar(
+            requests_per_day, 
+            x='CREATION_DATE', 
+            y='Request Count', 
+            color='Request Count',
+            color_continuous_scale='Viridis',  # Add color based on counts
+            title='Requests Per Day'
+        )
+
+        # Create smaller table
+        table = html.Table([
+            html.Thead(html.Tr([html.Th(col) for col in filtered_df.columns], style={'fontSize': '12px'})),
+            html.Tbody([
+                html.Tr([html.Td(filtered_df.iloc[i][col], style={'fontSize': '12px'}) for col in filtered_df.columns]) 
+                for i in range(min(len(filtered_df),100))  # Limiting to 10 rows for better display
+            ])
+        ])
         
         return fig, table
 
