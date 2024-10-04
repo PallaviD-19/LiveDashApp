@@ -224,63 +224,48 @@ def set_group_id_options(selected_application_id, selected_functionality):
      Input('date_range_picker', 'start_date'),
      Input('date_range_picker', 'end_date')]
 )
+
 def update_graph_and_table(selected_application_id, selected_functionality, selected_group_id, selected_request_status, start_date, end_date):
      if os.path.exists(output_csv):
         df = pd.read_csv(output_csv)
         # Convert the 'CREATION_DATE' to datetime format
         df['CREATION_DATE'] = pd.to_datetime(df['CREATION_DATE'], dayfirst=True, errors='coerce')
 
-        if start_date is not None:    
+        # Load the dataframe (assuming df is the original dataframe you're filtering)
+        filtered_df = df.copy()  # Initialize the dataframe
+        
+        # Convert start_date and end_date to datetime if they are not None
+        if start_date is not None:
             start_date = pd.to_datetime(start_date)
         if end_date is not None:
             end_date = pd.to_datetime(end_date)
-
-        # Filter based on date range only if both start_date and end_date are provided
+        
+        # Filter based on date range if both start_date and end_date are provided
         if start_date is not None and end_date is not None:
-            filtered_df = df[
+            filtered_df = filtered_df[
                 (filtered_df['CREATION_DATE'] >= start_date) &
                 (filtered_df['CREATION_DATE'] <= end_date)
             ]
-        else:
-            filtered_df = df.copy()
-
-        if selected_application_id:
+        
+        # Filter based on other dropdowns if selections are made
+        if selected_application_id is not None:
             filtered_df = filtered_df[filtered_df['APPLICATION_ID'] == selected_application_id]
-
-        if selected_functionality:
+        
+        if selected_functionality is not None:
             filtered_df = filtered_df[filtered_df['FUNCTIONALITY'] == selected_functionality]
-
-        if selected_group_id:
+        
+        if selected_group_id is not None:
             filtered_df = filtered_df[filtered_df['GROUP_ID'] == selected_group_id]
-
-        if selected_request_status:
+        
+        if selected_request_status is not None:
             filtered_df = filtered_df[filtered_df['REQUEST_STATUS'] == selected_request_status]
-
-        filtered_df = filtered_df[
-            (filtered_df['CREATION_DATE'] >= pd.to_datetime(start_date)) &
-            (filtered_df['CREATION_DATE'] <= pd.to_datetime(end_date))
-        ]
-
-        # Create colorful graph
-        requests_per_day = filtered_df.groupby(filtered_df['CREATION_DATE'].dt.date).size().reset_index(name='Request Count')
-        fig = px.bar(
-            requests_per_day, 
-            x='CREATION_DATE', 
-            y='Request Count', 
-            color='Request Count',
-            color_continuous_scale='Viridis',  # Add color based on counts
-            title='Requests Per Day'
-        )
-
-        # Create smaller table
-        table = html.Table([
-            html.Thead(html.Tr([html.Th(col) for col in filtered_df.columns], style={'fontSize': '12px'})),
-            html.Tbody([
-                html.Tr([html.Td(filtered_df.iloc[i][col], style={'fontSize': '12px'}) for col in filtered_df.columns]) 
-                for i in range(min(len(filtered_df),100))  # Limiting to 10 rows for better display
-            ])
-        ])
-
+    
+        # Create the figure (assuming you're using Plotly for visualization)
+        fig = create_plotly_figure(filtered_df)  # Your figure generation function
+        
+        # Create the table (assuming you're using Dash DataTable or similar)
+        table = create_dash_table(filtered_df)  # Your table generation function
+        
         return fig, table
 
 # Callback to update the value counts graph and table based on column selection
