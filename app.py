@@ -52,7 +52,16 @@ def monitor_and_update():
 app = dash.Dash(__name__, suppress_callback_exceptions=True)
 server = app.server
 
-df = pd.read_csv(output_csv)
+# df = pd.read_csv(output_csv)
+# Check if the file exists before loading it
+if os.path.exists(output_csv):
+    df = pd.read_csv(output_csv)
+    # Convert the 'CREATION_DATE' to datetime format
+    df['CREATION_DATE'] = pd.to_datetime(df['CREATION_DATE'], dayfirst=True, errors='coerce')
+else:
+    # Create an empty DataFrame with the expected structure if the file doesn't exist
+    df = pd.DataFrame(columns=['APPLICATION_ID', 'FUNCTIONALITY', 'GROUP_ID', 'REQUEST_STATUS', 'CREATION_DATE', 'SITE_ID'])
+
 # Convert the 'CREATION_DATE' to datetime format
 df['CREATION_DATE'] = pd.to_datetime(df['CREATION_DATE'], dayfirst=True, errors='coerce')
 
