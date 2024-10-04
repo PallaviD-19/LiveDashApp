@@ -50,6 +50,7 @@ def monitor_and_update():
 
 # Dash App Setup
 app = dash.Dash(__name__, suppress_callback_exceptions=True)
+server = app.server
 
 df = pd.read_csv(output_csv)
 # Convert the 'CREATION_DATE' to datetime format
