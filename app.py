@@ -230,7 +230,19 @@ def update_graph_and_table(selected_application_id, selected_functionality, sele
         # Convert the 'CREATION_DATE' to datetime format
         df['CREATION_DATE'] = pd.to_datetime(df['CREATION_DATE'], dayfirst=True, errors='coerce')
 
-        filtered_df = df.copy()
+        if start_date is not None:    
+            start_date = pd.to_datetime(start_date)
+        if end_date is not None:
+            end_date = pd.to_datetime(end_date)
+
+        # Filter based on date range only if both start_date and end_date are provided
+        if start_date is not None and end_date is not None:
+            filtered_df = df[
+                (filtered_df['CREATION_DATE'] >= start_date) &
+                (filtered_df['CREATION_DATE'] <= end_date)
+            ]
+        else:
+            filtered_df = df.copy()
 
         if selected_application_id:
             filtered_df = filtered_df[filtered_df['APPLICATION_ID'] == selected_application_id]
