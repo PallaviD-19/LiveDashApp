@@ -1,0 +1,4 @@
+pandas==2.0.3
+dash==2.9.3
+numpy==1.26.4
+decorator==5.1.1
